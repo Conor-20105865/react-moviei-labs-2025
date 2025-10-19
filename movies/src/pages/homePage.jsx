@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from "react";
-import MovieList from "../components/movieList";
-import Grid from "@mui/material/Grid";
-import Header from "../components/headerMovieList";
-import FilterCard from "../components/filterMoviesCard";
+import PageTemplate from '../components/templateMovieListPage'
+import { getMovies } from "../api/tmdb-api";
 
 const HomePage = (props) => {
   const [movies, setMovies] = useState([]);
-  const [nameFilter, setNameFilter] = useState("");
-  const [genreFilter, setGenreFilter] = useState("0");
-
-  const handleChange = (type, value) => {
-    if (type === "name") setNameFilter(value);
-    else setGenreFilter(value);
-  };
+  const favorites = movies.filter(m => m.favorite)
+  localStorage.setItem('favorites', JSON.stringify(favorites))
 
   const addToFavorites = (movieId) => {
     const updatedMovies = movies.map((m) =>
@@ -21,51 +14,19 @@ const HomePage = (props) => {
     setMovies(updatedMovies);
   };
 
-  useEffect(() => {
-    fetch(
-      `https://api.themoviedb.org/3/discover/movie?api_key=${
-        import.meta.env.VITE_TMDB_KEY
-      }&language=en-US&include_adult=false&page=1`
-    )
-      .then((res) => res.json())
-      .then((json) => json.results)
-      .then((movies) => {
-        setMovies(movies);
-      });
+   useEffect(() => {
+    getMovies().then(movies => {
+      setMovies(movies);
+    });
   }, []);
 
-  const genreId = Number(genreFilter);
-
-  let displayedMovies = movies
-    .filter((m) => m.title.toLowerCase().includes(nameFilter.toLowerCase()))
-    .filter((m) => (genreId > 0 ? m.genre_ids.includes(genreId) : true));
 
   return (
-    <Grid container>
-      <Grid item xs={12}>
-        <Header title={"Home Page"} />
-      </Grid>
-      <Grid container sx={{ flex: "1 1 500px" }}>
-        <Grid
-          key="find"
-          item
-          xs={12}
-          sm={6}
-          md={4}
-          lg={3}
-          xl={2}
-          sx={{ padding: "20px" }}
-        >
-          <FilterCard
-            onUserInput={handleChange}
-            titleFilter={nameFilter}
-            genreFilter={genreFilter}
-          />
-        </Grid>
-        <MovieList movies={displayedMovies} selectFavorite={addToFavorites} />
-      </Grid>
-    </Grid>
+    <PageTemplate
+      title='Discover Movies'
+      movies={movies}
+      selectFavorite={addToFavorites}
+    />
   );
 };
-
 export default HomePage;
