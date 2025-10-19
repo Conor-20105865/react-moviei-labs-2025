@@ -27,18 +27,16 @@ export default function FilterMoviesCard(props) {
     )
       .then((res) => res.json())
       .then((json) => {
-        // console.log(json.genres)
         return json.genres;
       })
       .then((apiGenres) => {
         setGenres([genres[0], ...apiGenres]);
       });
-    // eslint-disable-next-line
   }, []);
 
   const handleChange = (e, type, value) => {
     e.preventDefault();
-    // Completed later
+    props.onUserInput(type, value);
   };
 
   const handleTextChange = (e) => {
