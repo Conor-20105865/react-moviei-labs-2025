@@ -9,6 +9,18 @@ const HomePage = (props) => {
   const [nameFilter, setNameFilter] = useState("");
   const [genreFilter, setGenreFilter] = useState("0");
 
+  const handleChange = (type, value) => {
+    if (type === "name") setNameFilter(value);
+    else setGenreFilter(value);
+  };
+
+  const addToFavorites = (movieId) => {
+    const updatedMovies = movies.map((m) =>
+      m.id === movieId ? { ...m, favorite: true } : m
+    );
+    setMovies(updatedMovies);
+  };
+
   useEffect(() => {
     fetch(
       `https://api.themoviedb.org/3/discover/movie?api_key=${
@@ -16,9 +28,7 @@ const HomePage = (props) => {
       }&language=en-US&include_adult=false&page=1`
     )
       .then((res) => res.json())
-      .then((json) => {
-        return json.results;
-      })
+      .then((json) => json.results)
       .then((movies) => {
         setMovies(movies);
       });
@@ -27,17 +37,8 @@ const HomePage = (props) => {
   const genreId = Number(genreFilter);
 
   let displayedMovies = movies
-    .filter((m) => {
-      return m.title.toLowerCase().search(nameFilter.toLowerCase()) !== -1;
-    })
-    .filter((m) => {
-      return genreId > 0 ? m.genre_ids.includes(genreId) : true;
-    });
-
-  const handleChange = (type, value) => {
-    if (type === "name") setNameFilter(value);
-    else setGenreFilter(value);
-  };
+    .filter((m) => m.title.toLowerCase().includes(nameFilter.toLowerCase()))
+    .filter((m) => (genreId > 0 ? m.genre_ids.includes(genreId) : true));
 
   return (
     <Grid container>
@@ -61,7 +62,7 @@ const HomePage = (props) => {
             genreFilter={genreFilter}
           />
         </Grid>
-        <MovieList movies={displayedMovies} />
+        <MovieList movies={displayedMovies} selectFavorite={addToFavorites} />
       </Grid>
     </Grid>
   );
